@@ -12,7 +12,8 @@ public class MyReduceFunction implements ReduceFunction<StockDataAgg> {
                 (sd1.getSumClose() + sd2.getSumClose())/(sd1.getCount()+sd2.getCount()),
                 sd1.getStockFull(),
                 sd1.getCount()+sd2.getCount(),
-                sd1.getSumClose() + sd2.getSumClose()
+                sd1.getSumClose() + sd2.getSumClose(),
+                sd1.getMonth()
         );
     }
 }

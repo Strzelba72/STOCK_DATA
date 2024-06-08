@@ -12,7 +12,17 @@ public class StockDataAgg {
     private int count;
     private float sumClose;
 
-    public StockDataAgg(String stock, float volumeSum, float minLow, float maxHigh, float avgClose,String stockFull, int count, float sumClose) {
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    private int month;
+
+    public StockDataAgg(String stock, float volumeSum, float minLow, float maxHigh, float avgClose,String stockFull, int count, float sumClose, int month) {
         this.stock = stock;
         this.volumeSum = volumeSum;
         this.minLow = minLow;
@@ -21,11 +31,12 @@ public class StockDataAgg {
         this.stockFull = stockFull;
         this.sumClose = sumClose;
         this.count = count;
+        this.month = month;
     }
 
     @Override
     public String toString() {
-        return "Stock data aggregate {"+stock+" "+volumeSum+" "+minLow+" "+maxHigh+" "+avgClose+" "+stockFull+" "+sumClose+" "+count+"}";
+        return "Stock data aggregate {Stock:"+stock+" VolumeSum:"+volumeSum+" MinLow:"+minLow+" MaxHigh:"+maxHigh+" AvgClose:"+avgClose+" StockFull:"+stockFull+" SumClose:"+sumClose+" Count:"+count+" Month:"+month+"}";
     }
 
     public String getStock() {

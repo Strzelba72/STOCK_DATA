@@ -27,7 +27,7 @@ public class StockData {
 
     @Override
     public String toString() {
-        return "Stock Data{ "+stock+" "+date+" "+open+" "+high+" "+low+" "+close+" "+adjClose+" "+volume+"}";
+        return "Stock Data{ Stock:"+stock+" Date:"+date+" Open:"+open+" High:"+high+" Low:"+low+" Close:"+close+" AdjClose:"+adjClose+" Volume:"+volume+"}";
 
     }
 

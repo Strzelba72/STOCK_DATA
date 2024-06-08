@@ -1,5 +1,6 @@
 import connector.Connectors;
 import model.StaticData;
+import model.StockAnnomalie;
 import model.StockData;
 import model.StockDataAgg;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -7,8 +8,13 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Collector;
+import window.EventTrigger;
+import window.MonthEventTrigger;
+
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -49,12 +55,29 @@ public class Main {
                     String stock = array[7];
                     return new StockData(date, open, high, low, close, adjClose, volume, stock);
                 })
+                .map(new MapFunction<StockData, StockData>() {
+                    @Override
+                    public StockData map(StockData value) throws Exception {
+                        //System.out.println("Timestamp: " + value.getDate());
+                        return value;
+                    }
+                })
                 .assignTimestampsAndWatermarks(
                         WatermarkStrategy
                                 .<StockData>forBoundedOutOfOrderness(Duration.ofDays(1))
-                                .withTimestampAssigner((event, timestamp) -> event.getDate().toEpochSecond(ZoneOffset.UTC) * 1000));
-        ;
-        stockDataDS.print("StockData");
+                                .withTimestampAssigner((event, timestamp) -> event.getDate().toEpochSecond(ZoneOffset.UTC) * 1000))
+                .process(new ProcessFunction<StockData, StockData>() {
+                @Override
+                    public void processElement(StockData value, Context ctx, Collector<StockData> out) throws Exception {
+                        long watermark = ctx.timerService().currentWatermark();
+                        //System.out.println("Current watermark: " + watermark);
+                        out.collect(value);
+            }
+        });
+
+        //stockDataDS.print("StockData");
+
+
 
         DataStream<StockDataAgg> stockDataExtDS = stockDataDS
                 .map(sd -> new StockDataAgg(
@@ -65,13 +88,21 @@ public class Main {
                         sd.getClose(),
                         map.get(sd.getStock()),
                         1,
-                        sd.getClose()
+                        sd.getClose(),
+                        sd.getDate().getMonthValue()
                 ))
                 .keyBy(StockDataAgg::getStock)
-                .window(TumblingEventTimeWindows.of(Time.days(30)))
+                .window(new MonthEventTrigger("A"))
                 .reduce(new MyReduceFunction());
 
-        stockDataExtDS.print();
+
+            stockDataExtDS.print("StockDataAgg");
+          /*
+            DataStream<StockAnnomalie> stockDataAnnomalie = stockDataDS
+                    .map(sd -> new StockAnnomalie(
+
+                    ))
+        */
         env.execute("Main");
     }
 }
