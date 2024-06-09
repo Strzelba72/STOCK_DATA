@@ -12,3 +12,4 @@ echo "HDFS setup complete"
 echo "Setting up Kafka topics"
 ./topic-setup.sh
 echo "Kafka topics set up"
+./flink-setup.sh
