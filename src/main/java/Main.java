@@ -31,7 +31,7 @@ public class Main {
         ParameterTool propertiesFromArgs = ParameterTool.fromArgs(args);
         ParameterTool properties = propertiesFromFile.mergeWith(propertiesFromArgs);
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(
-                "flights-in-us",
+                "stock-data",
                 new SimpleStringSchema(),
                 properties.getProperties()
         );

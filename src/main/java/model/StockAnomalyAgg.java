@@ -1,7 +1,7 @@
 package model;
 
 import org.apache.flink.streaming.api.transformations.SideOutputTransformation;
-import window.EventTrigger;
+
 
 public class StockAnomalyAgg {
     private String stock;
