@@ -39,7 +39,7 @@ public class MonthEventTrigger extends WindowAssigner<Object, TimeWindow> {
 
     @Override
     public Trigger<Object, TimeWindow> getDefaultTrigger(StreamExecutionEnvironment env) {
-        return delay.equals("A") ? EventTrigger.create() : EventTriggerDelay.create();
+        return CustomTrigger.create();
     }
 
     @Override

@@ -1,39 +1,42 @@
 package model;
 
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
-public class StaticData {
-    public static HashMap<String, String> LoadFromCSV() {
+public class StaticData  {
+    public static HashMap<String, String> LoadFromCSV(String pathStatic) {
         HashMap<String, String> map = new HashMap<>();
-        try (Scanner scanner = new Scanner(new File("symbols_valid_meta.csv"))) {
-            // Read the header line
-            if (scanner.hasNextLine()) {
-                scanner.nextLine();
-            }
-
-            // Read the rest of the file
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] values = line.split(",", -1);
-
-                // Handle quoted values that may contain commas
-                String symbol = values[1];
-                String securityName = values[2];
-                if (securityName.startsWith("\"")) {
-                    securityName = securityName.substring(1, securityName.length() - 1);
-                }
-
-                map.put(symbol, securityName);
-            }
-        } catch (FileNotFoundException e) {
+        try (Stream<Path> path = Files.walk(Paths.get(pathStatic))) {
+            path.filter(Files::isRegularFile)
+                    .forEach(file -> {
+                        try (Stream<String> lines = Files.lines(file)) {
+                            lines.map(line -> line.split(","))
+                                    .filter(array -> array.length == 8)
+                                    .filter(array -> !array[0].startsWith("Date"))
+                                    .forEach(array -> {
+                                        String stock = array[1];
+                                        String StockFull = array[2];
+                                        map.put(stock,StockFull);
+                                    });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
         return map;
     }
-
 
 }
 

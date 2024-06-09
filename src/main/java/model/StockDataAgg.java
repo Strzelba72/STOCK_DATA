@@ -102,5 +102,6 @@ public class StockDataAgg {
     public void setSumClose(float sumClose) {
         this.sumClose = sumClose;
     }
+
 }
 
