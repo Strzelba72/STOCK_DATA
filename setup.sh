@@ -4,6 +4,7 @@ export CLUSTER_NAME=$(/usr/share/google/get_metadata_value attributes/dataproc-c
 export BUCKET_NAME="pbds-24-ms" 
 export TOPIC_NAME="stock-data"
 export GROUP_NAME="stock-data-group"
+export ANOMALY_TOPIC_NAME="stock-anomalies"
 export INPUT_DIR="stock-data"
 export SLEEP_TIME="10"
 export HEADER_LENGTH="1"
