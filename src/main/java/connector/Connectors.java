@@ -1,10 +1,13 @@
 package connector;
 import model.StockDataAgg;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.file.src.FileSource;
+import org.apache.flink.connector.file.src.reader.TextLineInputFormat;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
 import java.sql.PreparedStatement;
@@ -14,8 +17,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 public class Connectors {
     public static SinkFunction<StockDataAgg> getMySQLSink(ParameterTool properties) {
-        JdbcStatementBuilder<StockDataAgg> statementBuilder =
-                new JdbcStatementBuilder<StockDataAgg>() {
+        JdbcStatementBuilder<StockDataAgg> statementBuilder = new JdbcStatementBuilder<StockDataAgg>() {
                     @Override
                     public void accept(PreparedStatement ps, StockDataAgg data) throws SQLException {
                         ps.setString(1, data.getStock());
@@ -48,6 +50,14 @@ public class Connectors {
                         executionOptions,
                         connectionOptions);
         return jdbcSink;
+    }
+    public static FileSource<String> getFileSource(ParameterTool properties) {
+        return FileSource
+                .forRecordStreamFormat(new TextLineInputFormat(),
+                        new Path(properties.getRequired("fileInput.uri")))
+                .monitorContinuously(Duration.ofMillis(
+                        Long.parseLong(properties.getRequired("fileInput.interval"))))
+                .build();
     }
 
 }

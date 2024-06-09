@@ -1,15 +1,9 @@
 package model;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.stream.Stream;
 
 public class StaticData  {
@@ -19,13 +13,14 @@ public class StaticData  {
             path.filter(Files::isRegularFile)
                     .forEach(file -> {
                         try (Stream<String> lines = Files.lines(file)) {
-                            lines.map(line -> line.split(","))
-                                    .filter(array -> array.length == 8)
-                                    .filter(array -> !array[0].startsWith("Date"))
+                            lines.skip(1) // Skip header
+                                    .map(line -> line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) // Split CSV correctly handling quotes
                                     .forEach(array -> {
-                                        String stock = array[1];
-                                        String StockFull = array[2];
-                                        map.put(stock,StockFull);
+                                        if (array.length > 2) {
+                                            String stock = array[1].trim();
+                                            String stockFull = array[2].trim();
+                                            map.put(stock, stockFull);
+                                        }
                                     });
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -34,7 +29,6 @@ public class StaticData  {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return map;
     }
 

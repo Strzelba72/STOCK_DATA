@@ -30,6 +30,7 @@ public class Main {
         ParameterTool propertiesFromFile = ParameterTool.fromPropertiesFile("src/main/resources/flink.properties");
         ParameterTool propertiesFromArgs = ParameterTool.fromArgs(args);
         ParameterTool properties = propertiesFromFile.mergeWith(propertiesFromArgs);
+        //ACTIVE IN CLOUD MODE
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(
                 "stock-data",
                 new SimpleStringSchema(),
@@ -38,13 +39,14 @@ public class Main {
         // Map with static data
         HashMap<String, String> map = StaticData.LoadFromCSV(properties.get("fileInput.uri.static"));
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        /*
-        DataStream<String> inputStream = env.fromSource(
-                Connectors.getFileSource(properties),
-                WatermarkStrategy.noWatermarks(),
-                "StockData"
-        );
-        */
+
+        //ACTIVE IN LOCAL MODE
+//        DataStream<String> inputStream = env.fromSource(
+//                Connectors.getFileSource(properties),
+//                WatermarkStrategy.noWatermarks(),
+//                "StockData"
+//        );
+        //ACTIVE IN CLOUD MODE
         DataStream<String> inputStream = env.addSource(consumer);
 
         //Create  DataStream<StockData> based on input data
@@ -104,12 +106,9 @@ public class Main {
                 .window(new MonthEventTrigger(properties.get("delay")))
                 .reduce(new MyReduceFunction());
 
+            //ACTIVE IN LOCAL MODE
+           //stockDataExtDS.print("StockDataAgg");
 
-//            stockDataExtDS.print("StockDataAgg");
-
-
-
-            //methods MyReduceFunctionAnomaly are
             DataStream<StockAnomaly> stockAnomalyDataStream = stockDataDS
                     .map(sd -> new StockAnomalyAgg(
                             sd.getStock(),
@@ -126,8 +125,9 @@ public class Main {
                 //.out.println("Aktualny znacznik wodny: " + context.timerService().currentWatermark());
                 collector.collect(stockAnomaly);
             }});
-
-//            stockAnomalyDataStream.print();
+        //ACTIVE IN LOCAL MODE
+        //stockAnomalyDataStream.print();
+        //ACTIVE IN CLOUD MODE
         stockDataExtDS.addSink(Connectors.getMySQLSink(properties));
         stockAnomalyDataStream.map((MapFunction<StockAnomaly, String>) Object::toString).sinkTo(KafkaSink.<String>builder()
                .setBootstrapServers(properties.get("bootstrap.servers"))
