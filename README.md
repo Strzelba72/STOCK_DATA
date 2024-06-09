@@ -1,4 +1,4 @@
-%Uruchomienie klastra%
+#Uruchomienie klastra#
 gcloud dataproc clusters create ${CLUSTER_NAME} \
 --enable-component-gateway --region ${REGION} --subnet default \
 --master-machine-type n1-standard-4 --master-boot-disk-size 50 \
